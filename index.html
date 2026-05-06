@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Academic Engine - SPK Ekspor</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            SPK - ENGINE
+        </div>
+        <div class="nav-item active" onclick="showPage('overview', this)">
+            <span class="nav-text">Dashboard</span>
+        </div>
+        <div class="nav-item" onclick="showPage('dataset', this)">
+            <span class="nav-text">Dataset</span>
+        </div>
+        <div class="nav-item" onclick="showPage('ahp', this)">
+            <span class="nav-text">Analisis AHP</span>
+        </div>
+        <div class="nav-item" onclick="showPage('saw', this)">
+            <span class="nav-text">Ranking SAW</span>
+        </div>
+    </div>
+
+    <!-- MAIN KONTEN BUNGKUSAN -->
+    <div class="main-wrapper">
+        
+        <!-- TOP NAVIGATION BAR -->
+        <div class="topbar">
+            <div>
+                <button class="toggle-btn" onclick="toggleSidebar()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <!-- Bagian alat/tema sudah dihilangkan -->
+        </div>
+
+        <!-- ISI HALAMAN -->
+        <div class="main-content">
+            
+            <!-- PAGE 1: OVERVIEW -->
+            <div id="overview" class="page active">
+                <h2>Executive Summary</h2>
+                
+                <div class="grid-3">
+                    <div class="stat-card">
+                        <i class="fas fa-boxes"></i>
+                        <h3 id="statTotalData">0</h3>
+                        <p>Total Komoditas</p>
+                    </div>
+                    <div class="stat-card" style="border-bottom-color: var(--success);">
+                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
+                        <h3>0.015</h3>
+                        <p>Consistency Ratio (CR)</p>
+                    </div>
+                    <div class="stat-card" style="border-bottom-color: var(--warning);">
+                        <i class="fas fa-dollar-sign" style="color: var(--warning);"></i>
+                        <h3 id="statMaxExport">0</h3>
+                        <p>Max Ekspor (Juta USD)</p>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Top 10 Nilai Ekspor Murni</h3>
+                        <div class="chart-container"><canvas id="overviewBarChart"></canvas></div>
+                    </div>
+                    <div class="card">
+                        <h3>Distribusi Bobot (AHP)</h3>
+                        <div class="chart-container" style="height:250px;"><canvas id="ahpDoughnutChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 2: DATASET EXPLORER -->
+            <div id="dataset" class="page">
+                <h2>Dataset Komoditas</h2>
+                <div class="card">
+                    <input type="text" id="searchInput" class="search-box" placeholder="Pencarian komoditas... (Ketik lalu tekan Enter atau biarkan)" onkeyup="filterDataset()">
+                    
+                    <div class="table-wrapper">
+                        <div class="table-container">
+                            <table id="fullDataTable">
+                                <thead>
+                                    <tr>
+                                        <th>No</th>
+                                        <th>Deskripsi Komoditas</th>
+                                        <th>Export Value (USD)</th>
+                                        <th>Export Weight (Kg)</th>
+                                        <th>Import Value (USD)</th>
+                                        <th>Import Weight (Kg)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="datasetBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 3: AHP (KRITERIA) -->
+            <div id="ahp" class="page">
+                <h2>Perhitungan AHP</h2>
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Matriks Perbandingan Berpasangan</h3>
+                        <div class="table-wrapper">
+                            <table>
+                                <tr><th>Kriteria</th><th>Exp Value</th><th>Exp Wgt</th><th>Imp Value</th><th>Imp Wgt</th></tr>
+                                <tr><td><strong>Exp Value</strong></td><td>1.00</td><td>3.00</td><td>2.00</td><td>4.00</td></tr>
+                                <tr><td><strong>Exp Wgt</strong></td><td>0.33</td><td>1.00</td><td>0.50</td><td>2.00</td></tr>
+                                <tr><td><strong>Imp Value</strong></td><td>0.50</td><td>2.00</td><td>1.00</td><td>3.00</td></tr>
+                                <tr><td><strong>Imp Wgt</strong></td><td>0.25</td><td>0.50</td><td>0.33</td><td>1.00</td></tr>
+                            </table>
+                        </div>
+                        <br>
+                        <div class="badge success"><i class="fas fa-check"></i> Status: Konsisten (CR = 0.015 < 0.1)</div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Bobot Prioritas Global (W)</h3>
+                        <div class="table-wrapper">
+                            <table>
+                                <tr><th>Kriteria</th><th>Bobot</th><th>Atribut</th></tr>
+                                <tr><td>Export Value</td><td><strong>0.465</strong></td><td><span class="badge success">Benefit</span></td></tr>
+                                <tr><td>Export Weight</td><td><strong>0.160</strong></td><td><span class="badge success">Benefit</span></td></tr>
+                                <tr><td>Import Value</td><td><strong>0.278</strong></td><td><span class="badge warning">Cost</span></td></tr>
+                                <tr><td>Import Weight</td><td><strong>0.097</strong></td><td><span class="badge warning">Cost</span></td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PAGE 4: SAW (RANKING) -->
+            <div id="saw" class="page">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--secondary); margin-bottom:20px;">
+                    <h2 style="border:none; margin:0; padding-bottom:5px;">Ranking SAW</h2>
+                    
+                    <div>
+                        <button class="btn-action" onclick="exportCSV()"><i class="fas fa-download"></i> CSV</button>
+                        <button class="btn-action btn-print" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+                    </div>
+                </div>
+                
+                <div class="card" style="margin-bottom: 25px;">
+                    <h3>Grafik Top 10 Prioritas</h3>
+                    <div class="chart-container"><canvas id="sawRankingChart"></canvas></div>
+                </div>
+
+                <div class="card">
+                    <h3>Tabel Keputusan Akhir</h3>
+                    <div class="table-wrapper">
+                        <div class="table-container">
+                            <table id="rankingTable">
+                                <thead>
+                                    <tr>
+                                        <th>Peringkat</th>
+                                        <th>Deskripsi Komoditas</th>
+                                        <th>Nilai Preferensi (V)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rankingBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
