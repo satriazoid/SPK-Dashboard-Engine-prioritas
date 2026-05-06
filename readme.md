@@ -46,5 +46,7 @@ Aplikasi ini bersifat *client-side* murni, yang berarti Anda tidak perlu mengins
 ```text
 /
  index.html               # File utama aplikasi (UI, Logic SPK, dan Data)
+ style.css                # File design dan ui
+ script.js                # File untuk membua algoritma AHP + SAW
  dataset_akumulasi.csv    # Dataset mentah (Referensi)
  README.md                # Dokumentasi proyek
