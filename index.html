@@ -1,182 +1,198 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Academic Engine - SPK Ekspor</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>AHP+SAW | Sistem Pendukung Keputusan Komoditas Ekspor-Impor</title>
+    <!-- Tailwind + Font Awesome + Chart.js -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- SweetAlert2 untuk notifikasi interaktif -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </head>
-<body>
 
-    <!-- SIDEBAR -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            SPK - ENGINE
-        </div>
-        <div class="nav-item active" onclick="showPage('overview', this)">
-            <span class="nav-text">Dashboard</span>
-        </div>
-        <div class="nav-item" onclick="showPage('dataset', this)">
-            <span class="nav-text">Dataset</span>
-        </div>
-        <div class="nav-item" onclick="showPage('ahp', this)">
-            <span class="nav-text">Analisis AHP</span>
-        </div>
-        <div class="nav-item" onclick="showPage('saw', this)">
-            <span class="nav-text">Ranking SAW</span>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 font-sans">
+
+    <!-- Navbar Multi Page -->
+    <div class="sticky top-0 z-20 bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-wrap items-center justify-between py-2">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-chart-line text-2xl text-blue-600"></i>
+                    <span class="font-bold text-gray-800 text-lg">AHP+SAW Decision Suite</span>
+                </div>
+                <div class="flex space-x-1 mt-2 sm:mt-0" id="nav-buttons">
+                    <button data-page="dashboard"
+                        class="nav-btn px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-blue-50 transition flex items-center gap-2"><i
+                            class="fas fa-tachometer-alt"></i> Dashboard</button>
+                    <button data-page="ahp"
+                        class="nav-btn px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-blue-50 transition flex items-center gap-2"><i
+                            class="fas fa-balance-scale"></i> AHP Bobot</button>
+                    <button data-page="ranking"
+                        class="nav-btn px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-blue-50 transition flex items-center gap-2"><i
+                            class="fas fa-trophy"></i> Ranking SAW</button>
+                    <button data-page="data"
+                        class="nav-btn px-4 py-2 rounded-lg font-medium text-gray-700 hover:bg-blue-50 transition flex items-center gap-2"><i
+                            class="fas fa-table"></i> Data Komoditas</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- MAIN KONTEN BUNGKUSAN -->
-    <div class="main-wrapper">
-        
-        <!-- TOP NAVIGATION BAR -->
-        <div class="topbar">
-            <div>
-                <button class="toggle-btn" onclick="toggleSidebar()">
-                    <i class="fas fa-bars"></i>
-                </button>
+    <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:py-8">
+        <!-- ========================= PAGE: DASHBOARD ========================= -->
+        <div id="page-dashboard" class="page">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white rounded-2xl shadow p-5 card-hover border-l-8 border-blue-500">
+                    <div class="flex justify-between"><i class="fas fa-boxes text-3xl text-blue-400"></i><span
+                            class="text-gray-400 text-sm">Total Komoditas</span></div>
+                    <p class="text-3xl font-bold mt-2" id="total-komoditas">0</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-5 card-hover border-l-8 border-green-500">
+                    <div class="flex justify-between"><i class="fas fa-dollar-sign text-3xl text-green-400"></i><span
+                            class="text-gray-400">Total Ekspor (Value)</span></div>
+                    <p class="text-2xl font-bold mt-2" id="total-ev">-</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-5 card-hover border-l-8 border-amber-500">
+                    <div class="flex justify-between"><i class="fas fa-weight-hanging text-3xl text-amber-400"></i><span
+                            class="text-gray-400">Total Impor (Weight)</span></div>
+                    <p class="text-2xl font-bold mt-2" id="total-iw">-</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-5 card-hover border-l-8 border-purple-500">
+                    <div class="flex justify-between"><i class="fas fa-chart-simple text-3xl text-purple-400"></i><span
+                            class="text-gray-400">Top 1 Komoditas (SAW)</span></div>
+                    <p class="text-md font-semibold mt-2" id="top1-name">-</p>
+                </div>
             </div>
-            <!-- Bagian alat/tema sudah dihilangkan -->
+            <div class="grid lg:grid-cols-2 gap-6">
+                <div class="bg-white rounded-2xl shadow p-5">
+                    <h3 class="font-semibold text-gray-700"><i class="fas fa-chart-pie mr-2 text-blue-500"></i> Bobot
+                        Kriteria (AHP saat ini)</h3>
+                    <canvas id="dashboard-weight-chart" height="200"></canvas>
+                </div>
+                <div class="bg-white rounded-2xl shadow p-5">
+                    <h3 class="font-semibold text-gray-700"><i class="fas fa-chart-bar mr-2 text-indigo-500"></i> Top 5
+                        Komoditas (Skor SAW)</h3>
+                    <canvas id="dashboard-top5-chart" height="200"></canvas>
+                </div>
+            </div>
+            <div class="mt-6 text-center text-sm text-gray-400">Sistem pendukung keputusan menggunakan AHP (pairwise
+                comparison) dan SAW. Ganti bobot kriteria di halaman AHP.</div>
         </div>
 
-        <!-- ISI HALAMAN -->
-        <div class="main-content">
-            
-            <!-- PAGE 1: OVERVIEW -->
-            <div id="overview" class="page active">
-                <h2>Executive Summary</h2>
-                
-                <div class="grid-3">
-                    <div class="stat-card">
-                        <i class="fas fa-boxes"></i>
-                        <h3 id="statTotalData">0</h3>
-                        <p>Total Komoditas</p>
-                    </div>
-                    <div class="stat-card" style="border-bottom-color: var(--success);">
-                        <i class="fas fa-check-circle" style="color: var(--success);"></i>
-                        <h3>0.015</h3>
-                        <p>Consistency Ratio (CR)</p>
-                    </div>
-                    <div class="stat-card" style="border-bottom-color: var(--warning);">
-                        <i class="fas fa-dollar-sign" style="color: var(--warning);"></i>
-                        <h3 id="statMaxExport">0</h3>
-                        <p>Max Ekspor (Juta USD)</p>
+        <!-- ========================= PAGE: AHP (BOBOT) ========================= -->
+        <div id="page-ahp" class="page hidden">
+            <div class="bg-white rounded-2xl shadow-md p-6">
+                <div class="flex flex-wrap justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800"><i
+                            class="fas fa-balance-scale mr-2 text-purple-600"></i> Matriks Perbandingan Berpasangan
+                        (AHP)</h2>
+                    <button id="reset-ahp"
+                        class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg text-sm transition"><i
+                            class="fas fa-undo-alt mr-1"></i> Reset Matriks Default</button>
+                </div>
+                <p class="text-sm text-gray-500 mb-4">Isi nilai perbandingan kepentingan baris <b>(i)</b> terhadap kolom
+                    <b>(j)</b>. Skala 1-9 (1=sama penting, 9=sangat penting). Nilai kebalikan otomatis.
+                </p>
+                <div class="overflow-x-auto">
+                    <table class="pairwise-table mx-auto border-separate border-spacing-2">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="px-4 py-2">Kriteria</th>
+                                <th>EV</th>
+                                <th>EW</th>
+                                <th>IV</th>
+                                <th>IW</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pairwise-matrix-body"></tbody>
+                    </table>
+                </div>
+                <div class="mt-6 grid md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl">
+                    <div><span class="font-semibold">Bobot Eigenvector:</span> <span id="ahp-weights"
+                            class="font-mono text-sm"></span></div>
+                    <div><span class="font-semibold">λ maks:</span> <span id="lambda-max">-</span> | <span
+                            class="font-semibold">CI:</span> <span id="ci">-</span> | <span
+                            class="font-semibold">CR:</span> <span id="cr" class="font-bold"></span></div>
+                </div>
+                <div id="cr-msg" class="mt-2 text-sm text-red-600 hidden bg-red-50 p-2 rounded-lg"><i
+                        class="fas fa-exclamation-triangle mr-1"></i> Rasio Konsistensi > 0,1 → matriks kurang
+                    konsisten, sebaiknya disesuaikan.</div>
+                <div class="mt-4 text-sm text-gray-500"><i class="fas fa-sync-alt"></i> Bobot akan langsung digunakan di
+                    halaman Ranking & Dashboard.</div>
+            </div>
+        </div>
+
+        <!-- ========================= PAGE: RANKING SAW ========================= -->
+        <div id="page-ranking" class="page hidden">
+            <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+                <div class="p-5 border-b flex flex-wrap justify-between items-center gap-3">
+                    <h2 class="text-xl font-bold text-gray-800"><i class="fas fa-trophy text-yellow-500 mr-2"></i>
+                        Perankingan Komoditas (SAW)</h2>
+                    <div class="flex gap-2">
+                        <input type="text" id="search-ranking" placeholder="Cari komoditas..."
+                            class="border rounded-lg px-3 py-1 text-sm w-48 focus:ring-blue-300">
+                        <button id="export-csv"
+                            class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg text-sm"><i
+                                class="fas fa-download"></i> Export CSV</button>
                     </div>
                 </div>
-
-                <div class="grid-2">
-                    <div class="card">
-                        <h3>Top 10 Nilai Ekspor Murni</h3>
-                        <div class="chart-container"><canvas id="overviewBarChart"></canvas></div>
+                <div class="flex flex-col lg:flex-row">
+                    <div class="lg:w-2/3 w-full overflow-x-auto p-4">
+                        <table class="min-w-full text-sm border-collapse">
+                            <thead class="bg-gray-100 text-gray-700 sticky top-0">
+                                <tr>
+                                    <th class="p-2 text-left">Rank</th>
+                                    <th class="p-2 text-left">Komoditas</th>
+                                    <th class="p-2 text-right">Skor SAW</th>
+                                    <th class="p-2 text-center">EV norm</th>
+                                    <th class="p-2 text-center">EW norm</th>
+                                    <th class="p-2 text-center">IV norm</th>
+                                    <th class="p-2 text-center">IW norm</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ranking-table-body"></tbody>
+                        </table>
                     </div>
-                    <div class="card">
-                        <h3>Distribusi Bobot (AHP)</h3>
-                        <div class="chart-container" style="height:250px;"><canvas id="ahpDoughnutChart"></canvas></div>
+                    <div class="lg:w-1/3 w-full p-4 border-t lg:border-t-0 lg:border-l bg-gray-50">
+                        <h3 class="font-semibold text-center">Top 10 Skor SAW</h3>
+                        <canvas id="ranking-chart" height="280"></canvas>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- PAGE 2: DATASET EXPLORER -->
-            <div id="dataset" class="page">
-                <h2>Dataset Komoditas</h2>
-                <div class="card">
-                    <input type="text" id="searchInput" class="search-box" placeholder="Pencarian komoditas... (Ketik lalu tekan Enter atau biarkan)" onkeyup="filterDataset()">
-                    
-                    <div class="table-wrapper">
-                        <div class="table-container">
-                            <table id="fullDataTable">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Deskripsi Komoditas</th>
-                                        <th>Export Value (USD)</th>
-                                        <th>Export Weight (Kg)</th>
-                                        <th>Import Value (USD)</th>
-                                        <th>Import Weight (Kg)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="datasetBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
+        <!-- ========================= PAGE: DATA KOMODITAS ========================= -->
+        <div id="page-data" class="page hidden">
+            <div class="bg-white rounded-2xl shadow-md p-5">
+                <div class="flex justify-between items-center flex-wrap mb-4">
+                    <h2 class="text-xl font-bold"><i class="fas fa-database mr-2 text-blue-600"></i> Data Mentah
+                        Komoditas</h2>
+                    <input type="text" id="search-data" placeholder="Filter komoditas..."
+                        class="border rounded-lg px-3 py-1 text-sm w-64">
+                </div>
+                <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
+                    <table class="min-w-full text-xs border">
+                        <thead class="bg-gray-100 sticky top-0">
+                            <tr>
+                                <th>#</th>
+                                <th>Deskripsi</th>
+                                <th class="text-right">EV</th>
+                                <th class="text-right">EW</th>
+                                <th class="text-right">IV</th>
+                                <th class="text-right">IW</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-table-body"></tbody>
+                    </table>
                 </div>
             </div>
-
-            <!-- PAGE 3: AHP (KRITERIA) -->
-            <div id="ahp" class="page">
-                <h2>Perhitungan AHP</h2>
-                <div class="grid-2">
-                    <div class="card">
-                        <h3>Matriks Perbandingan Berpasangan</h3>
-                        <div class="table-wrapper">
-                            <table>
-                                <tr><th>Kriteria</th><th>Exp Value</th><th>Exp Wgt</th><th>Imp Value</th><th>Imp Wgt</th></tr>
-                                <tr><td><strong>Exp Value</strong></td><td>1.00</td><td>3.00</td><td>2.00</td><td>4.00</td></tr>
-                                <tr><td><strong>Exp Wgt</strong></td><td>0.33</td><td>1.00</td><td>0.50</td><td>2.00</td></tr>
-                                <tr><td><strong>Imp Value</strong></td><td>0.50</td><td>2.00</td><td>1.00</td><td>3.00</td></tr>
-                                <tr><td><strong>Imp Wgt</strong></td><td>0.25</td><td>0.50</td><td>0.33</td><td>1.00</td></tr>
-                            </table>
-                        </div>
-                        <br>
-                        <div class="badge success"><i class="fas fa-check"></i> Status: Konsisten (CR = 0.015 < 0.1)</div>
-                    </div>
-                    
-                    <div class="card">
-                        <h3>Bobot Prioritas Global (W)</h3>
-                        <div class="table-wrapper">
-                            <table>
-                                <tr><th>Kriteria</th><th>Bobot</th><th>Atribut</th></tr>
-                                <tr><td>Export Value</td><td><strong>0.465</strong></td><td><span class="badge success">Benefit</span></td></tr>
-                                <tr><td>Export Weight</td><td><strong>0.160</strong></td><td><span class="badge success">Benefit</span></td></tr>
-                                <tr><td>Import Value</td><td><strong>0.278</strong></td><td><span class="badge warning">Cost</span></td></tr>
-                                <tr><td>Import Weight</td><td><strong>0.097</strong></td><td><span class="badge warning">Cost</span></td></tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- PAGE 4: SAW (RANKING) -->
-            <div id="saw" class="page">
-                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid var(--secondary); margin-bottom:20px;">
-                    <h2 style="border:none; margin:0; padding-bottom:5px;">Ranking SAW</h2>
-                    
-                    <div>
-                        <button class="btn-action" onclick="exportCSV()"><i class="fas fa-download"></i> CSV</button>
-                        <button class="btn-action btn-print" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
-                    </div>
-                </div>
-                
-                <div class="card" style="margin-bottom: 25px;">
-                    <h3>Grafik Top 10 Prioritas</h3>
-                    <div class="chart-container"><canvas id="sawRankingChart"></canvas></div>
-                </div>
-
-                <div class="card">
-                    <h3>Tabel Keputusan Akhir</h3>
-                    <div class="table-wrapper">
-                        <div class="table-container">
-                            <table id="rankingTable">
-                                <thead>
-                                    <tr>
-                                        <th>Peringkat</th>
-                                        <th>Deskripsi Komoditas</th>
-                                        <th>Nilai Preferensi (V)</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="rankingBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
+
 </html>
